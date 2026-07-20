@@ -20,6 +20,17 @@ function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
 }
 
+// Set by AuthProvider so a 401 from an authenticated call can clear the
+// session and bounce to /login, instead of just failing inline. Auth
+// endpoints themselves (login/register) also return 401 for bad
+// credentials — that's not a session expiry, so request() below excludes
+// them rather than firing this.
+let onUnauthorized: (() => void) | null = null;
+
+export function setUnauthorizedHandler(handler: (() => void) | null) {
+  onUnauthorized = handler;
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {},
@@ -35,6 +46,9 @@ async function request<T>(
 
   const body = await res.json().catch(() => null);
   if (!res.ok) {
+    if (res.status === 401 && !path.startsWith("/api/v1/auth/")) {
+      onUnauthorized?.();
+    }
     const message =
       body && typeof body === "object" && "error" in body
         ? String((body as { error: unknown }).error)

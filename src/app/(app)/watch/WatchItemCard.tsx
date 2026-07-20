@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import {
+  ApiError,
   WatchListEntry,
   WatchStatus,
   deleteWatchStatus,
   upsertWatchStatus,
 } from "@/lib/api";
+import { useToast } from "@/lib/toast-context";
 
 const STATUS_OPTIONS: { value: WatchStatus; label: string }[] = [
   { value: "plan_to_watch", label: "Plan to watch" },
@@ -25,6 +27,7 @@ export default function WatchItemCard({
   onChanged: (updated: WatchListEntry) => void;
   onRemoved: () => void;
 }) {
+  const { showToast } = useToast();
   const [season, setSeason] = useState(entry.current_season ?? "");
   const [episode, setEpisode] = useState(entry.current_episode ?? "");
   const [saving, setSaving] = useState(false);
@@ -43,6 +46,10 @@ export default function WatchItemCard({
       if (updated.trakt_sync && updated.trakt_sync !== "skipped") {
         setSyncNote(`Trakt: ${updated.trakt_sync}`);
       }
+    } catch (err) {
+      showToast(
+        err instanceof ApiError ? err.message : "Could not save progress",
+      );
     } finally {
       setSaving(false);
     }
@@ -50,8 +57,14 @@ export default function WatchItemCard({
 
   async function remove() {
     if (!confirm(`Remove "${entry.title}" from your list?`)) return;
-    await deleteWatchStatus(entry.watch_item_id);
-    onRemoved();
+    try {
+      await deleteWatchStatus(entry.watch_item_id);
+      onRemoved();
+    } catch (err) {
+      showToast(
+        err instanceof ApiError ? err.message : "Could not remove item",
+      );
+    }
   }
 
   return (

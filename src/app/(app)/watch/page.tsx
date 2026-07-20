@@ -4,11 +4,16 @@ import { useCallback, useEffect, useState } from "react";
 import { ApiError, WatchListEntry, listMyWatchList } from "@/lib/api";
 import WatchAddModal from "./WatchAddModal";
 import WatchItemCard from "./WatchItemCard";
+import ListItemSkeleton from "@/components/ListItemSkeleton";
+import Pagination from "@/components/Pagination";
+
+const PAGE_SIZE = 10;
 
 export default function WatchPage() {
   const [items, setItems] = useState<WatchListEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [page, setPage] = useState(1);
 
   const load = useCallback(() => {
     listMyWatchList()
@@ -19,6 +24,13 @@ export default function WatchPage() {
   }, []);
 
   useEffect(load, [load]);
+
+  const pageCount = Math.max(1, Math.ceil((items?.length ?? 0) / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pageItems = items?.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   return (
     <div className="space-y-4">
@@ -35,7 +47,11 @@ export default function WatchPage() {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {items === null && !error && (
-        <p className="text-sm text-zinc-500">Loading...</p>
+        <ul className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <ListItemSkeleton key={i} />
+          ))}
+        </ul>
       )}
       {items?.length === 0 && (
         <p className="text-sm text-zinc-500">
@@ -44,7 +60,7 @@ export default function WatchPage() {
       )}
 
       <ul className="space-y-3">
-        {items?.map((entry) => (
+        {pageItems?.map((entry) => (
           <WatchItemCard
             key={entry.watch_item_id}
             entry={entry}
@@ -69,11 +85,14 @@ export default function WatchPage() {
         ))}
       </ul>
 
+      <Pagination page={currentPage} pageCount={pageCount} onChange={setPage} />
+
       {showAdd && (
         <WatchAddModal
           onClose={() => setShowAdd(false)}
           onAdded={() => {
             setShowAdd(false);
+            setPage(1);
             load();
           }}
         />

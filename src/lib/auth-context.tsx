@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import * as api from "@/lib/api";
+import { useToast } from "@/lib/toast-context";
 
 type AuthContextValue = {
   user: api.User | null;
@@ -21,6 +22,7 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { showToast } = useToast();
   const [user, setUser] = useState<api.User | null>(null);
   // Lazy-initialized from localStorage directly so the "no stored token"
   // case never needs a synchronous setState from inside the effect below
@@ -28,6 +30,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(
     () => typeof window !== "undefined" && !!localStorage.getItem(api.TOKEN_KEY),
   );
+
+  useEffect(() => {
+    api.setUnauthorizedHandler(() => {
+      localStorage.removeItem(api.TOKEN_KEY);
+      setUser(null);
+      showToast("Session expired — please log in again.", "error");
+    });
+    return () => api.setUnauthorizedHandler(null);
+  }, [showToast]);
 
   useEffect(() => {
     const token = localStorage.getItem(api.TOKEN_KEY);

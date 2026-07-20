@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import {
+  ApiError,
   BookListEntry,
   BookStatus,
   deleteBookStatus,
   upsertBookStatus,
 } from "@/lib/api";
+import { useToast } from "@/lib/toast-context";
 
 const STATUS_OPTIONS: { value: BookStatus; label: string }[] = [
   { value: "want_to_read", label: "Want to read" },
@@ -25,6 +27,7 @@ export default function BookItemCard({
   onChanged: (updated: BookListEntry) => void;
   onRemoved: () => void;
 }) {
+  const { showToast } = useToast();
   const isChaptered = entry.format === "manga" || entry.format === "manhwa";
   const [page, setPage] = useState(entry.current_page ?? "");
   const [chapter, setChapter] = useState(entry.current_chapter ?? "");
@@ -46,6 +49,10 @@ export default function BookItemCard({
       if (updated.hardcover_sync && updated.hardcover_sync !== "skipped") {
         setSyncNote(`Hardcover: ${updated.hardcover_sync}`);
       }
+    } catch (err) {
+      showToast(
+        err instanceof ApiError ? err.message : "Could not save progress",
+      );
     } finally {
       setSaving(false);
     }
@@ -53,8 +60,14 @@ export default function BookItemCard({
 
   async function remove() {
     if (!confirm(`Remove "${entry.title}" from your list?`)) return;
-    await deleteBookStatus(entry.book_item_id);
-    onRemoved();
+    try {
+      await deleteBookStatus(entry.book_item_id);
+      onRemoved();
+    } catch (err) {
+      showToast(
+        err instanceof ApiError ? err.message : "Could not remove item",
+      );
+    }
   }
 
   return (
