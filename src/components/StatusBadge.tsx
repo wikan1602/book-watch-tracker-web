@@ -1,6 +1,6 @@
 export type BadgeVariant = "plan" | "active" | "done" | "hold" | "dropped";
 
-const VARIANT_CLASSES: Record<BadgeVariant, string> = {
+export const BADGE_VARIANT_CLASSES: Record<BadgeVariant, string> = {
   plan: "border border-border text-ink-dim",
   active: "bg-gold-dim text-gold",
   done: "bg-gold text-on-gold",
@@ -17,7 +17,7 @@ export default function StatusBadge({
 }) {
   return (
     <span
-      className={`inline-flex w-fit items-center gap-1 rounded px-2.5 py-1 text-[11px] font-bold tracking-[.03em] uppercase ${VARIANT_CLASSES[variant]}`}
+      className={`inline-flex w-fit items-center gap-1 rounded px-2.5 py-1 text-[11px] font-bold tracking-[.03em] uppercase ${BADGE_VARIANT_CLASSES[variant]}`}
     >
       {label}
     </span>

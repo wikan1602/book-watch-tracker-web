@@ -10,7 +10,8 @@ import {
 } from "@/lib/api";
 import { useToast } from "@/lib/toast-context";
 import CoverPlaceholder from "@/components/CoverPlaceholder";
-import StatusBadge, { BadgeVariant } from "@/components/StatusBadge";
+import { BadgeVariant, BADGE_VARIANT_CLASSES } from "@/components/StatusBadge";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 const STATUS_OPTIONS: {
   value: WatchStatus;
@@ -38,6 +39,7 @@ export default function WatchItemCard({
   const [episode, setEpisode] = useState(entry.current_episode ?? "");
   const [saving, setSaving] = useState(false);
   const [syncNote, setSyncNote] = useState<string | null>(null);
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
 
   const current = STATUS_OPTIONS.find((o) => o.value === entry.status)!;
 
@@ -64,7 +66,7 @@ export default function WatchItemCard({
   }
 
   async function remove() {
-    if (!confirm(`Remove "${entry.title}" from your list?`)) return;
+    setConfirmingRemove(false);
     try {
       await deleteWatchStatus(entry.watch_item_id);
       onRemoved();
@@ -95,7 +97,7 @@ export default function WatchItemCard({
           value={entry.status}
           disabled={saving}
           onChange={(e) => save(e.target.value as WatchStatus)}
-          className="w-fit rounded-md border border-border bg-surface-2 px-2 py-1 text-sm text-ink"
+          className={`w-fit rounded px-2.5 py-1 text-[11px] font-bold tracking-[.03em] uppercase ${BADGE_VARIANT_CLASSES[current.variant]}`}
         >
           {STATUS_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -103,7 +105,6 @@ export default function WatchItemCard({
             </option>
           ))}
         </select>
-        <StatusBadge variant={current.variant} label={current.label} />
 
         {entry.type === "show" && (
           <>
@@ -158,12 +159,21 @@ export default function WatchItemCard({
 
         {entry.type !== "show" && <div className="flex-1" />}
         <button
-          onClick={remove}
+          onClick={() => setConfirmingRemove(true)}
           className="text-left text-xs font-semibold text-ink-dim hover:text-danger"
         >
           Remove
         </button>
       </div>
+
+      {confirmingRemove && (
+        <ConfirmDialog
+          title="Remove item?"
+          message={`Remove "${entry.title}" from your list?`}
+          onCancel={() => setConfirmingRemove(false)}
+          onConfirm={remove}
+        />
+      )}
     </li>
   );
 }
