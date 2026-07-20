@@ -1,26 +1,111 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --bg: oklch(97% 0.014 85);
+  --surface: oklch(99% 0.008 85);
+  --surface-2: oklch(93% 0.02 82);
+  --border: oklch(84% 0.03 80);
+  --ink: oklch(20% 0.012 60);
+  --ink-dim: oklch(45% 0.02 60);
+  --gold: oklch(52% 0.13 80);
+  --gold-strong: oklch(45% 0.15 78);
+  --gold-dim: oklch(89% 0.05 85);
+  --on-gold: oklch(99% 0.01 85);
+  --danger: oklch(52% 0.19 25);
+  --danger-dim: oklch(93% 0.05 25);
+  --shadow: 0 1px 2px oklch(20% 0.02 60 / 0.06), 0 8px 24px oklch(20% 0.02 60 / 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: oklch(15% 0.014 55);
+    --surface: oklch(20% 0.018 55);
+    --surface-2: oklch(25% 0.022 55);
+    --border: oklch(33% 0.03 60);
+    --ink: oklch(93% 0.018 85);
+    --ink-dim: oklch(64% 0.03 70);
+    --gold: oklch(78% 0.13 85);
+    --gold-strong: oklch(70% 0.15 80);
+    --gold-dim: oklch(35% 0.06 80);
+    --on-gold: oklch(16% 0.015 55);
+    --danger: oklch(62% 0.19 25);
+    --danger-dim: oklch(30% 0.08 25);
+    --shadow: 0 1px 2px oklch(0% 0 0 / 0.3), 0 12px 32px oklch(0% 0 0 / 0.45);
   }
 }
 
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
+  --color-gold: var(--gold);
+  --color-gold-strong: var(--gold-strong);
+  --color-gold-dim: var(--gold-dim);
+  --color-on-gold: var(--on-gold);
+  --color-danger: var(--danger);
+  --color-danger-dim: var(--danger-dim);
+  --font-serif: var(--font-playfair);
+  --font-sans: var(--font-manrope);
+}
+
+.shadow-app {
+  box-shadow: var(--shadow);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -220px 0;
+  }
+  100% {
+    background-position: 220px 0;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease;
+}
+
+.animate-pop-in {
+  animation: popIn 0.2s ease;
+}
+
+.animate-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-surface-2) 0px,
+    var(--color-border) 90px,
+    var(--color-surface-2) 180px
+  );
+  background-size: 220px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
 }

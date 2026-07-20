@@ -29,18 +29,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Log in</h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Book & Watch Tracker
-          </p>
-        </div>
+    <div className="flex flex-1 flex-col items-center px-4 py-16">
+      <span className="mb-10 font-serif text-lg font-bold text-gold">
+        Book &amp; Watch
+      </span>
+      <div className="shadow-app w-full max-w-sm rounded-xl border border-border bg-surface p-8">
+        <h1 className="mb-1.5 font-serif text-2xl font-bold text-ink">
+          Welcome back
+        </h1>
+        <p className="mb-6 text-[13px] text-ink-dim">Sign in to your library.</p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <label htmlFor="email" className="text-sm font-medium">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="email" className="text-[11px] font-semibold text-ink-dim">
               Email
             </label>
             <input
@@ -49,11 +50,14 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+              className="rounded-md border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink"
             />
           </div>
-          <div className="space-y-1">
-            <label htmlFor="password" className="text-sm font-medium">
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="password"
+              className="text-[11px] font-semibold text-ink-dim"
+            >
               Password
             </label>
             <input
@@ -62,37 +66,40 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+              className="rounded-md border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink"
             />
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-danger">{error}</p>}
 
           <button
             type="submit"
             disabled={pending}
-            className="w-full rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
+            className="mt-1.5 rounded-md bg-gold px-3 py-3 text-sm font-bold text-on-gold disabled:opacity-50"
           >
-            {pending ? "Logging in..." : "Log in"}
+            {pending ? "Logging in..." : "Sign in"}
           </button>
         </form>
 
-        <div className="flex items-center gap-2 text-xs text-zinc-400">
-          <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
-          or
-          <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+        <div className="my-4 flex items-center gap-2.5">
+          <span className="h-px flex-1 bg-border" />
+          <span className="text-[11px] text-ink-dim">or</span>
+          <span className="h-px flex-1 bg-border" />
         </div>
 
         <a
           href={googleLoginUrl()}
-          className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-center text-sm font-medium dark:border-zinc-700"
+          className="flex w-full items-center justify-center gap-2.5 rounded-md border border-border px-3 py-2.5 text-center text-sm font-semibold text-ink"
         >
+          <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full border border-current text-[11px] font-bold">
+            G
+          </span>
           Sign in with Google
         </a>
 
-        <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-6 text-center text-[13px] text-ink-dim">
           No account?{" "}
-          <Link href="/register" className="font-medium underline">
+          <Link href="/register" className="font-semibold text-gold">
             Register
           </Link>
         </p>

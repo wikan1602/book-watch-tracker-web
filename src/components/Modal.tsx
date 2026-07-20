@@ -11,24 +11,43 @@ export default function Modal({
 }) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 px-4 py-10"
+      className="animate-fade-in fixed inset-0 z-100 flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-10 backdrop-blur-[2px]"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-lg bg-white p-5 shadow-lg dark:bg-zinc-900"
+        className="shadow-app animate-pop-in w-full max-w-[520px] rounded-xl border border-border bg-surface"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{title}</h2>
+        <div className="flex items-center justify-between border-b border-border px-6 py-5">
+          <h2 className="font-serif text-lg font-bold text-ink">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+            className="p-1 text-ink-dim"
           >
-            ✕
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <line
+                x1="2"
+                y1="2"
+                x2="12"
+                y2="12"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+              <line
+                x1="12"
+                y1="2"
+                x2="2"
+                y2="12"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+            </svg>
           </button>
         </div>
-        {children}
+        <div className="px-6 py-5">{children}</div>
       </div>
     </div>
   );

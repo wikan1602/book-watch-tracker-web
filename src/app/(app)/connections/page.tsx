@@ -10,6 +10,7 @@ import {
   listConnections,
   traktLoginUrl,
 } from "@/lib/api";
+import StatusBadge from "@/components/StatusBadge";
 
 export default function ConnectionsPage() {
   const [connections, setConnections] = useState<Connection[] | null>(null);
@@ -91,106 +92,104 @@ export default function ConnectionsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl font-semibold">Connections</h1>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+    <div>
+      <h1 className="mb-6 font-serif text-[28px] font-bold text-ink">
+        Connections
+      </h1>
+      {error && <p className="mb-4 text-sm text-danger">{error}</p>}
 
-      <section className="space-y-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-medium">Trakt</h2>
-            <p className="text-xs text-zinc-400">
-              Syncs watch status changes to your Trakt watchlist/history.
-            </p>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-5">
+        <section className="shadow-app flex flex-col gap-3.5 rounded-[10px] border border-border bg-surface p-6">
+          <div className="flex items-center justify-between">
+            <span className="font-serif text-lg font-bold text-ink">
+              Trakt
+            </span>
+            {isConnected("trakt") ? (
+              <StatusBadge variant="active" label="● Connected" />
+            ) : (
+              <StatusBadge variant="plan" label="Not connected" />
+            )}
           </div>
+          <p className="text-[13px] text-ink-dim">
+            Syncs watch status changes to your Trakt watchlist/history.
+          </p>
           {isConnected("trakt") ? (
-            <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900 dark:text-green-300">
-              Connected
-            </span>
+            <button
+              onClick={handleTraktDisconnect}
+              disabled={busy}
+              className="self-start rounded-md border border-danger px-4 py-2 text-[13px] font-bold text-danger disabled:opacity-50"
+            >
+              Disconnect
+            </button>
           ) : (
-            <span className="text-xs text-zinc-400">Not connected</span>
+            <button
+              onClick={handleTraktConnect}
+              disabled={busy}
+              className="self-start rounded-md bg-gold px-4 py-2 text-[13px] font-bold text-on-gold disabled:opacity-50"
+            >
+              Connect Trakt
+            </button>
           )}
-        </div>
-        {isConnected("trakt") ? (
-          <button
-            onClick={handleTraktDisconnect}
-            disabled={busy}
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm disabled:opacity-50 dark:border-zinc-700"
-          >
-            Disconnect
-          </button>
-        ) : (
-          <button
-            onClick={handleTraktConnect}
-            disabled={busy}
-            className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
-          >
-            Connect Trakt
-          </button>
-        )}
-      </section>
+        </section>
 
-      <section className="space-y-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-medium">Hardcover</h2>
-            <p className="text-xs text-zinc-400">
-              Syncs book status changes to your Hardcover library.
-            </p>
+        <section className="shadow-app flex flex-col gap-3.5 rounded-[10px] border border-border bg-surface p-6">
+          <div className="flex items-center justify-between">
+            <span className="font-serif text-lg font-bold text-ink">
+              Hardcover
+            </span>
+            {isConnected("hardcover") ? (
+              <StatusBadge variant="active" label="● Connected" />
+            ) : (
+              <StatusBadge variant="plan" label="Not connected" />
+            )}
           </div>
-          {isConnected("hardcover") ? (
-            <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900 dark:text-green-300">
-              Connected
-            </span>
-          ) : (
-            <span className="text-xs text-zinc-400">Not connected</span>
-          )}
-        </div>
+          <p className="text-[13px] text-ink-dim">
+            Syncs book status changes to your Hardcover library.
+          </p>
 
-        {isConnected("hardcover") ? (
-          <button
-            onClick={handleHardcoverDisconnect}
-            disabled={busy}
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm disabled:opacity-50 dark:border-zinc-700"
-          >
-            Disconnect
-          </button>
-        ) : (
-          <form onSubmit={handleHardcoverConnect} className="space-y-2">
-            <p className="text-xs text-zinc-400">
-              Paste your personal API token from{" "}
-              <a
-                href="https://hardcover.app/account/api"
-                target="_blank"
-                rel="noreferrer"
-                className="underline"
-              >
-                hardcover.app account settings
-              </a>
-              .
-            </p>
-            <div className="flex gap-2">
+          {isConnected("hardcover") ? (
+            <button
+              onClick={handleHardcoverDisconnect}
+              disabled={busy}
+              className="self-start rounded-md border border-danger px-4 py-2 text-[13px] font-bold text-danger disabled:opacity-50"
+            >
+              Disconnect
+            </button>
+          ) : (
+            <form onSubmit={handleHardcoverConnect} className="flex flex-col gap-2.5">
+              <p className="text-xs text-ink-dim">
+                Paste your personal API token from{" "}
+                <a
+                  href="https://hardcover.app/account/api"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-gold"
+                >
+                  hardcover.app account settings
+                </a>
+                .
+              </p>
               <input
                 type="password"
                 value={hardcoverToken}
                 onChange={(e) => setHardcoverToken(e.target.value)}
-                placeholder="Hardcover API token"
-                className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
+                placeholder="Paste API token…"
+                className="rounded-md border border-border bg-surface-2 px-3 py-2.5 text-[13px] text-ink"
               />
               <button
                 type="submit"
                 disabled={connectingHardcover}
-                className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
+                className="self-start rounded-md bg-gold px-4 py-2 text-[13px] font-bold text-on-gold disabled:opacity-50"
               >
                 {connectingHardcover ? "..." : "Connect"}
               </button>
-            </div>
-          </form>
-        )}
-        {hardcoverMessage && (
-          <p className="text-sm text-zinc-500">{hardcoverMessage}</p>
-        )}
-      </section>
+            </form>
+          )}
+          {hardcoverMessage && (
+            <p className="text-sm text-ink-dim">{hardcoverMessage}</p>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

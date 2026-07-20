@@ -9,13 +9,19 @@ import {
   upsertBookStatus,
 } from "@/lib/api";
 import { useToast } from "@/lib/toast-context";
+import CoverPlaceholder from "@/components/CoverPlaceholder";
+import StatusBadge, { BadgeVariant } from "@/components/StatusBadge";
 
-const STATUS_OPTIONS: { value: BookStatus; label: string }[] = [
-  { value: "want_to_read", label: "Want to read" },
-  { value: "reading", label: "Reading" },
-  { value: "completed", label: "Completed" },
-  { value: "on_hold", label: "On hold" },
-  { value: "dropped", label: "Dropped" },
+const STATUS_OPTIONS: {
+  value: BookStatus;
+  label: string;
+  variant: BadgeVariant;
+}[] = [
+  { value: "want_to_read", label: "Want to read", variant: "plan" },
+  { value: "reading", label: "Reading", variant: "active" },
+  { value: "completed", label: "Completed", variant: "done" },
+  { value: "on_hold", label: "On hold", variant: "hold" },
+  { value: "dropped", label: "Dropped", variant: "dropped" },
 ];
 
 export default function BookItemCard({
@@ -34,6 +40,8 @@ export default function BookItemCard({
   const [volume, setVolume] = useState(entry.current_volume ?? "");
   const [saving, setSaving] = useState(false);
   const [syncNote, setSyncNote] = useState<string | null>(null);
+
+  const current = STATUS_OPTIONS.find((o) => o.value === entry.status)!;
 
   async function save(status: BookStatus) {
     setSaving(true);
@@ -71,29 +79,22 @@ export default function BookItemCard({
   }
 
   return (
-    <li className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="font-medium">{entry.title}</p>
-          <p className="text-xs text-zinc-400">
-            {entry.author ? `${entry.author} · ` : ""}
-            {entry.format}
-          </p>
-        </div>
-        <button
-          onClick={remove}
-          className="text-xs text-zinc-400 hover:text-red-600"
-        >
-          Remove
-        </button>
-      </div>
+    <li className="shadow-app flex flex-col overflow-hidden rounded-[10px] border border-border bg-surface">
+      <CoverPlaceholder title={entry.title} />
+      <div className="flex flex-1 flex-col gap-2.5 p-4">
+        <span className="font-serif text-[15px] font-bold text-ink">
+          {entry.title}
+        </span>
+        <span className="text-[11px] font-semibold tracking-[.04em] text-ink-dim uppercase">
+          {entry.author ? `${entry.author} · ` : ""}
+          {entry.format}
+        </span>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
         <select
           value={entry.status}
           disabled={saving}
           onChange={(e) => save(e.target.value as BookStatus)}
-          className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-950"
+          className="w-fit rounded-md border border-border bg-surface-2 px-2 py-1 text-sm text-ink"
         >
           {STATUS_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -101,55 +102,78 @@ export default function BookItemCard({
             </option>
           ))}
         </select>
+        <StatusBadge variant={current.variant} label={current.label} />
 
         {isChaptered ? (
-          <>
-            <input
-              type="number"
-              min={0}
-              value={volume}
-              onChange={(e) =>
-                setVolume(e.target.value === "" ? "" : Number(e.target.value))
-              }
-              placeholder="Volume"
-              className="w-20 rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-950"
-            />
-            <input
-              type="number"
-              min={0}
-              value={chapter}
-              onChange={(e) =>
-                setChapter(
-                  e.target.value === "" ? "" : Number(e.target.value),
-                )
-              }
-              placeholder="Chapter"
-              className="w-20 rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-950"
-            />
-          </>
+          <div className="flex gap-2">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-semibold text-ink-dim">
+                Volume
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={volume}
+                onChange={(e) =>
+                  setVolume(e.target.value === "" ? "" : Number(e.target.value))
+                }
+                className="w-14 rounded-md border border-border bg-surface-2 px-2 py-1.5 text-[13px] text-ink"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-semibold text-ink-dim">
+                Chapter
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={chapter}
+                onChange={(e) =>
+                  setChapter(
+                    e.target.value === "" ? "" : Number(e.target.value),
+                  )
+                }
+                className="w-14 rounded-md border border-border bg-surface-2 px-2 py-1.5 text-[13px] text-ink"
+              />
+            </div>
+          </div>
         ) : (
-          <input
-            type="number"
-            min={0}
-            value={page}
-            onChange={(e) =>
-              setPage(e.target.value === "" ? "" : Number(e.target.value))
-            }
-            placeholder="Page"
-            className="w-20 rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-950"
-          />
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-semibold text-ink-dim">
+              Page
+            </label>
+            <input
+              type="number"
+              min={0}
+              value={page}
+              onChange={(e) =>
+                setPage(e.target.value === "" ? "" : Number(e.target.value))
+              }
+              className="w-17.5 rounded-md border border-border bg-surface-2 px-2 py-1.5 text-[13px] text-ink"
+            />
+          </div>
         )}
         <button
           onClick={() => save(entry.status)}
           disabled={saving}
-          className="rounded-md border border-zinc-300 px-2 py-1 text-sm disabled:opacity-50 dark:border-zinc-700"
+          className="rounded-md border border-gold px-3 py-2 text-xs font-bold text-gold disabled:opacity-50"
         >
           Save progress
         </button>
 
         {syncNote && (
-          <span className="text-xs text-zinc-400">{syncNote}</span>
+          <div className="flex items-center gap-1.5 text-[11px] text-ink-dim">
+            <span className="h-1.5 w-1.5 rounded-full bg-gold" />
+            {syncNote}
+          </div>
         )}
+
+        <button
+          onClick={remove}
+          className="text-left text-xs font-semibold text-ink-dim hover:text-danger"
+        >
+          Remove
+        </button>
       </div>
     </li>
   );

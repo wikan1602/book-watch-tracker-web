@@ -1,13 +1,11 @@
 export default function ListItemSkeleton() {
   return (
-    <li className="animate-pulse rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-      <div className="flex items-start justify-between gap-3">
-        <div className="space-y-2">
-          <div className="h-4 w-40 rounded bg-zinc-200 dark:bg-zinc-800" />
-          <div className="h-3 w-20 rounded bg-zinc-200 dark:bg-zinc-800" />
-        </div>
+    <li className="overflow-hidden rounded-lg border border-border bg-surface">
+      <div className="animate-shimmer aspect-[2/3]" />
+      <div className="flex flex-col gap-2 p-4">
+        <div className="animate-shimmer h-3.5 w-[70%] rounded" />
+        <div className="animate-shimmer h-2.5 w-[40%] rounded" />
       </div>
-      <div className="mt-3 h-7 w-64 max-w-full rounded bg-zinc-200 dark:bg-zinc-800" />
     </li>
   );
 }

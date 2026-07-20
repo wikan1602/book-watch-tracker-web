@@ -15,11 +15,19 @@ import {
 
 type Source = "googlebooks" | "openlibrary" | "hardcover";
 
-const SOURCE_LABELS: Record<Source, string> = {
-  googlebooks: "Google Books",
-  openlibrary: "Open Library",
-  hardcover: "Hardcover",
-};
+const SOURCES: { value: Source; label: string; hint: string }[] = [
+  { value: "googlebooks", label: "Google Books", hint: "Broad catalog search" },
+  {
+    value: "openlibrary",
+    label: "Open Library",
+    hint: "Community-maintained records",
+  },
+  {
+    value: "hardcover",
+    label: "Hardcover",
+    hint: "Matches your connected account",
+  },
+];
 
 const FORMAT_OPTIONS: BookFormat[] = ["novel", "manga", "manhwa", "other"];
 
@@ -30,7 +38,7 @@ export default function BookAddModal({
   onClose: () => void;
   onAdded: () => void;
 }) {
-  const [source, setSource] = useState<Source>("googlebooks");
+  const [source, setSource] = useState<Source | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<BookSearchResult[] | null>(null);
   const [searching, setSearching] = useState(false);
@@ -42,7 +50,7 @@ export default function BookAddModal({
 
   async function handleSearch(e: FormEvent) {
     e.preventDefault();
-    if (!query.trim()) return;
+    if (!query.trim() || !source) return;
     setSearching(true);
     setError(null);
     try {
@@ -92,154 +100,200 @@ export default function BookAddModal({
   }
 
   return (
-    <Modal title="Add a book" onClose={onClose}>
-      <div className="space-y-4">
+    <Modal title="Add book" onClose={onClose}>
+      <div className="flex flex-col gap-4">
         {!manual ? (
-          <>
-            <div className="flex gap-2">
-              {(Object.keys(SOURCE_LABELS) as Source[]).map((s) => (
+          !source ? (
+            <div className="flex flex-col gap-2.5">
+              <p className="mb-1 text-[13px] text-ink-dim">
+                Choose a source to search
+              </p>
+              {SOURCES.map((s) => (
                 <button
-                  key={s}
+                  key={s.value}
                   onClick={() => {
-                    setSource(s);
+                    setSource(s.value);
                     setResults(null);
                   }}
-                  className={`rounded-md px-2 py-1 text-xs font-medium ${
-                    source === s
-                      ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
-                      : "border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
-                  }`}
+                  className="rounded-lg border border-border bg-surface-2 p-3.5 text-left"
                 >
-                  {SOURCE_LABELS[s]}
+                  <div className="text-sm font-semibold text-ink">
+                    {s.label}
+                  </div>
+                  <div className="mt-0.5 text-xs text-ink-dim">{s.hint}</div>
                 </button>
               ))}
+              <button
+                onClick={() => setManual(true)}
+                className="self-start text-xs font-semibold text-ink-dim"
+              >
+                Can&apos;t find it? Add manually
+              </button>
             </div>
-            {source === "hardcover" && (
-              <p className="text-xs text-zinc-400">
-                Uses your own connected Hardcover account — connect it first
-                under Connections if search fails.
-              </p>
-            )}
-            {source === "openlibrary" && (
-              <p className="text-xs text-zinc-400">
-                Open Library may be unreachable from the server right now —
-                try Google Books if this fails.
-              </p>
-            )}
+          ) : (
+            <>
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={() => {
+                    setSource(null);
+                    setResults(null);
+                  }}
+                  className="text-[13px] text-ink-dim"
+                >
+                  ← Change
+                </button>
+                <span className="rounded bg-gold-dim px-2.5 py-1 text-[11px] font-bold text-gold">
+                  {SOURCES.find((s) => s.value === source)?.label}
+                </span>
+              </div>
+              {source === "hardcover" && (
+                <p className="text-xs text-ink-dim">
+                  Uses your own connected Hardcover account — connect it first
+                  under Connections if search fails.
+                </p>
+              )}
+              {source === "openlibrary" && (
+                <p className="text-xs text-ink-dim">
+                  Open Library may be unreachable from the server right now —
+                  try Google Books if this fails.
+                </p>
+              )}
 
-            <form onSubmit={handleSearch} className="flex gap-2">
+              <form onSubmit={handleSearch} className="flex gap-2">
+                <input
+                  autoFocus
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search books…"
+                  className="flex-1 rounded-md border border-border bg-surface-2 px-3 py-2 text-sm text-ink"
+                />
+                <button
+                  type="submit"
+                  disabled={searching}
+                  className="rounded-md bg-gold px-4 py-2 text-sm font-bold text-on-gold disabled:opacity-50"
+                >
+                  {searching ? "..." : "Search"}
+                </button>
+              </form>
+
+              {results && (
+                <ul className="flex max-h-72 flex-col gap-2 overflow-y-auto">
+                  {results.length === 0 && (
+                    <li className="text-sm text-ink-dim">No results.</li>
+                  )}
+                  {results.map((r, i) => (
+                    <li
+                      key={`${r.isbn ?? r.hardcover_id ?? r.title}-${i}`}
+                      className="flex items-center gap-3 rounded-lg border border-border p-2.5"
+                    >
+                      <div className="h-13 w-9 flex-shrink-0 rounded bg-linear-to-br from-gold-dim to-surface-2" />
+                      <div className="flex-1">
+                        <div className="text-[13px] font-semibold text-ink">
+                          {r.title}
+                          {r.authors && r.authors.length > 0 && (
+                            <span className="font-normal text-ink-dim">
+                              {" "}
+                              — {r.authors[0]}
+                            </span>
+                          )}
+                        </div>
+                        {r.year && (
+                          <div className="text-[11px] text-ink-dim">
+                            {r.year}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        disabled={adding}
+                        onClick={() =>
+                          addItem({
+                            title: r.title,
+                            author: r.authors?.[0],
+                            format: "novel",
+                            isbn: r.isbn,
+                            hardcover_id: r.hardcover_id,
+                          })
+                        }
+                        className="rounded-md border border-gold px-3 py-1.5 text-xs font-bold text-gold disabled:opacity-50"
+                      >
+                        Add
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <p className="text-xs text-ink-dim">
+                Added as &quot;novel&quot; by default — change the format
+                after adding if it&apos;s manga/manhwa.
+              </p>
+
+              <button
+                onClick={() => setManual(true)}
+                className="self-start text-xs font-semibold text-ink-dim"
+              >
+                Can&apos;t find it? Add manually
+              </button>
+            </>
+          )
+        ) : (
+          <form onSubmit={handleManualSubmit} className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-semibold text-ink-dim">
+                Title
+              </label>
               <input
                 autoFocus
+                required
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search a book..."
-                className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
+                className="rounded-md border border-border bg-surface-2 px-3 py-2 text-sm text-ink"
               />
-              <button
-                type="submit"
-                disabled={searching}
-                className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-semibold text-ink-dim">
+                Author (optional)
+              </label>
+              <input
+                value={manualAuthor}
+                onChange={(e) => setManualAuthor(e.target.value)}
+                className="rounded-md border border-border bg-surface-2 px-3 py-2 text-sm text-ink"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-semibold text-ink-dim">
+                Format
+              </label>
+              <select
+                value={manualFormat}
+                onChange={(e) => setManualFormat(e.target.value as BookFormat)}
+                className="rounded-md border border-border bg-surface-2 px-3 py-2 text-sm text-ink"
               >
-                {searching ? "..." : "Search"}
-              </button>
-            </form>
-
-            {results && (
-              <ul className="max-h-72 space-y-1 overflow-y-auto">
-                {results.length === 0 && (
-                  <li className="text-sm text-zinc-500">No results.</li>
-                )}
-                {results.map((r, i) => (
-                  <li key={`${r.isbn ?? r.hardcover_id ?? r.title}-${i}`}>
-                    <button
-                      disabled={adding}
-                      onClick={() =>
-                        addItem({
-                          title: r.title,
-                          author: r.authors?.[0],
-                          format: "novel",
-                          isbn: r.isbn,
-                          hardcover_id: r.hardcover_id,
-                        })
-                      }
-                      className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-sm hover:bg-zinc-100 disabled:opacity-50 dark:hover:bg-zinc-800"
-                    >
-                      <span>
-                        {r.title}{" "}
-                        {r.authors && r.authors.length > 0 && (
-                          <span className="text-zinc-400">
-                            — {r.authors[0]}
-                          </span>
-                        )}
-                      </span>
-                      {r.year && (
-                        <span className="text-xs text-zinc-400">
-                          {r.year}
-                        </span>
-                      )}
-                    </button>
-                  </li>
+                {FORMAT_OPTIONS.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
                 ))}
-              </ul>
-            )}
-
-            <p className="text-xs text-zinc-400">
-              Added as &quot;novel&quot; by default — change the format after
-              adding if it&apos;s manga/manhwa.
-            </p>
-
-            <button
-              onClick={() => setManual(true)}
-              className="text-xs text-zinc-500 underline"
-            >
-              Can&apos;t find it? Add manually
-            </button>
-          </>
-        ) : (
-          <form onSubmit={handleManualSubmit} className="space-y-3">
-            <input
-              autoFocus
-              required
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Title"
-              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
-            />
-            <input
-              value={manualAuthor}
-              onChange={(e) => setManualAuthor(e.target.value)}
-              placeholder="Author (optional)"
-              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
-            />
-            <select
-              value={manualFormat}
-              onChange={(e) => setManualFormat(e.target.value as BookFormat)}
-              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
-            >
-              {FORMAT_OPTIONS.map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </select>
+              </select>
+            </div>
             <button
               type="submit"
               disabled={adding}
-              className="w-full rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900"
+              className="self-start rounded-md bg-gold px-4.5 py-2.5 text-[13px] font-bold text-on-gold disabled:opacity-50"
             >
-              {adding ? "Adding..." : "Add"}
+              {adding ? "Adding..." : "Add manually"}
             </button>
             <button
               type="button"
               onClick={() => setManual(false)}
-              className="text-xs text-zinc-500 underline"
+              className="self-start text-xs font-semibold text-ink-dim"
             >
               Back to search
             </button>
           </form>
         )}
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
       </div>
     </Modal>
   );

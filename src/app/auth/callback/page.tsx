@@ -27,22 +27,27 @@ function CallbackHandler() {
 
   if (error) {
     return (
-      <div className="space-y-2 text-center">
-        <p className="text-sm text-red-600">{error}</p>
-        <a href="/login" className="text-sm underline">
-          Back to login
+      <div className="shadow-app flex flex-col items-center gap-3.5 rounded-xl border border-danger bg-surface px-6 py-12 text-center">
+        <p className="text-sm text-ink">{error}</p>
+        <a href="/login" className="text-[13px] font-semibold text-gold">
+          ← Back to login
         </a>
       </div>
     );
   }
 
-  return <p className="text-sm text-zinc-500">Signing you in...</p>;
+  return (
+    <div className="shadow-app flex flex-col items-center gap-4 rounded-xl border border-border bg-surface px-6 py-12">
+      <span className="h-7 w-7 animate-spin rounded-full border-[2.5px] border-gold-dim border-t-gold" />
+      <p className="text-sm text-ink-dim">Signing you in…</p>
+    </div>
+  );
 }
 
 export default function AuthCallbackPage() {
   return (
     <div className="flex flex-1 items-center justify-center px-4">
-      <Suspense fallback={<p className="text-sm text-zinc-500">Loading...</p>}>
+      <Suspense fallback={<p className="text-sm text-ink-dim">Loading...</p>}>
         <CallbackHandler />
       </Suspense>
     </div>

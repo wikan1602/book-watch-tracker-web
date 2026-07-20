@@ -33,33 +33,35 @@ export default function WatchPage() {
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Watch list</h1>
+    <div>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-serif text-[28px] font-bold text-ink">Watch</h1>
         <button
           onClick={() => setShowAdd(true)}
-          className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white dark:bg-zinc-50 dark:text-zinc-900"
+          className="rounded-md bg-gold px-5 py-2.75 text-sm font-bold text-on-gold"
         >
-          + Add
+          + Add movie or show
         </button>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="mb-4 text-sm text-danger">{error}</p>}
 
       {items === null && !error && (
-        <ul className="space-y-3">
+        <ul className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-5">
           {Array.from({ length: 3 }).map((_, i) => (
             <ListItemSkeleton key={i} />
           ))}
         </ul>
       )}
       {items?.length === 0 && (
-        <p className="text-sm text-zinc-500">
-          Nothing here yet — add a movie or show to get started.
-        </p>
+        <div className="flex min-h-[180px] items-center justify-center rounded-lg border border-dashed border-border bg-surface px-6 py-10 text-center">
+          <span className="text-sm text-ink-dim">
+            Nothing here yet — add a movie or show to get started.
+          </span>
+        </div>
       )}
 
-      <ul className="space-y-3">
+      <ul className="mb-7 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-5">
         {pageItems?.map((entry) => (
           <WatchItemCard
             key={entry.watch_item_id}
