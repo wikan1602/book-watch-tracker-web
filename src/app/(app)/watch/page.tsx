@@ -1,19 +1,30 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ApiError, WatchListEntry, listMyWatchList } from "@/lib/api";
+import { ApiError, WatchListEntry, WatchStatus, listMyWatchList } from "@/lib/api";
 import WatchAddModal from "./WatchAddModal";
 import WatchItemCard from "./WatchItemCard";
 import ListItemSkeleton from "@/components/ListItemSkeleton";
 import Pagination from "@/components/Pagination";
+import StatusFilterBar from "@/components/StatusFilterBar";
 
 const PAGE_SIZE = 10;
+
+const STATUS_FILTERS: { value: WatchStatus | "all"; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "plan_to_watch", label: "Plan to watch" },
+  { value: "watching", label: "Watching" },
+  { value: "completed", label: "Completed" },
+  { value: "on_hold", label: "On hold" },
+  { value: "dropped", label: "Dropped" },
+];
 
 export default function WatchPage() {
   const [items, setItems] = useState<WatchListEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<WatchStatus | "all">("all");
 
   const load = useCallback(() => {
     listMyWatchList()
@@ -25,9 +36,13 @@ export default function WatchPage() {
 
   useEffect(load, [load]);
 
-  const pageCount = Math.max(1, Math.ceil((items?.length ?? 0) / PAGE_SIZE));
+  const filteredItems = items?.filter(
+    (it) => statusFilter === "all" || it.status === statusFilter,
+  );
+
+  const pageCount = Math.max(1, Math.ceil((filteredItems?.length ?? 0) / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount);
-  const pageItems = items?.slice(
+  const pageItems = filteredItems?.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE,
   );
@@ -44,6 +59,17 @@ export default function WatchPage() {
         </button>
       </div>
 
+      {items !== null && items.length > 0 && (
+        <StatusFilterBar
+          options={STATUS_FILTERS}
+          active={statusFilter}
+          onChange={(v) => {
+            setStatusFilter(v);
+            setPage(1);
+          }}
+        />
+      )}
+
       {error && <p className="mb-4 text-sm text-danger">{error}</p>}
 
       {items === null && !error && (
@@ -57,6 +83,13 @@ export default function WatchPage() {
         <div className="flex min-h-[180px] items-center justify-center rounded-lg border border-dashed border-border bg-surface px-6 py-10 text-center">
           <span className="text-sm text-ink-dim">
             Nothing here yet — add a movie or show to get started.
+          </span>
+        </div>
+      )}
+      {items && items.length > 0 && filteredItems?.length === 0 && (
+        <div className="flex min-h-[180px] items-center justify-center rounded-lg border border-dashed border-border bg-surface px-6 py-10 text-center">
+          <span className="text-sm text-ink-dim">
+            No items with this status.
           </span>
         </div>
       )}
