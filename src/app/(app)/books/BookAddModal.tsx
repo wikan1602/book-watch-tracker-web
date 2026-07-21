@@ -12,6 +12,8 @@ import {
   searchOpenLibrary,
   upsertBookStatus,
 } from "@/lib/api";
+import { openLibraryCoverUrl } from "@/lib/cover";
+import ItemCover from "@/components/ItemCover";
 
 type Source = "googlebooks" | "openlibrary" | "hardcover";
 
@@ -186,7 +188,11 @@ export default function BookAddModal({
                       key={`${r.isbn ?? r.hardcover_id ?? r.title}-${i}`}
                       className="flex items-center gap-3 rounded-lg border border-border p-2.5"
                     >
-                      <div className="h-13 w-9 flex-shrink-0 rounded bg-linear-to-br from-gold-dim to-surface-2" />
+                      <ItemCover
+                        variant="thumb"
+                        title={r.title}
+                        src={openLibraryCoverUrl(r.isbn)}
+                      />
                       <div className="flex-1">
                         <div className="text-[13px] font-semibold text-ink">
                           {r.title}

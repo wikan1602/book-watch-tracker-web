@@ -9,7 +9,8 @@ import {
   upsertWatchStatus,
 } from "@/lib/api";
 import { useToast } from "@/lib/toast-context";
-import CoverPlaceholder from "@/components/CoverPlaceholder";
+import { tmdbPosterUrl } from "@/lib/cover";
+import ItemCover from "@/components/ItemCover";
 import { BadgeVariant, BADGE_VARIANT_CLASSES } from "@/components/StatusBadge";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
@@ -79,7 +80,7 @@ export default function WatchItemCard({
 
   return (
     <li className="shadow-app flex flex-col overflow-hidden rounded-[10px] border border-border bg-surface">
-      <CoverPlaceholder title={entry.title} />
+      <ItemCover title={entry.title} src={tmdbPosterUrl(entry.poster_path)} />
       <div className="flex flex-1 flex-col gap-2.5 p-4">
         <div className="flex justify-between gap-2">
           <span className="font-serif text-[15px] font-bold text-ink">

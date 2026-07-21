@@ -9,6 +9,8 @@ import {
   searchTmdb,
   upsertWatchStatus,
 } from "@/lib/api";
+import { tmdbPosterUrl } from "@/lib/cover";
+import ItemCover from "@/components/ItemCover";
 
 export default function WatchAddModal({
   onClose,
@@ -50,6 +52,7 @@ export default function WatchAddModal({
     title: string;
     year?: number;
     tmdb_id?: string;
+    poster_path?: string;
   }) {
     setAdding(true);
     setError(null);
@@ -125,7 +128,11 @@ export default function WatchAddModal({
                     key={`${r.type}-${r.tmdb_id}`}
                     className="flex items-center gap-3 rounded-lg border border-border p-2.5"
                   >
-                    <div className="h-13 w-9 flex-shrink-0 rounded bg-linear-to-br from-gold-dim to-surface-2" />
+                    <ItemCover
+                      variant="thumb"
+                      title={r.title}
+                      src={tmdbPosterUrl(r.poster_path)}
+                    />
                     <div className="flex-1">
                       <div className="text-[13px] font-semibold text-ink">
                         {r.title}
@@ -143,6 +150,7 @@ export default function WatchAddModal({
                           title: r.title,
                           year: r.year,
                           tmdb_id: r.tmdb_id,
+                          poster_path: r.poster_path,
                         })
                       }
                       className="rounded-md border border-gold px-3 py-1.5 text-xs font-bold text-gold disabled:opacity-50"

@@ -9,7 +9,8 @@ import {
   upsertBookStatus,
 } from "@/lib/api";
 import { useToast } from "@/lib/toast-context";
-import CoverPlaceholder from "@/components/CoverPlaceholder";
+import { openLibraryCoverUrl } from "@/lib/cover";
+import ItemCover from "@/components/ItemCover";
 import { BadgeVariant, BADGE_VARIANT_CLASSES } from "@/components/StatusBadge";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
@@ -82,7 +83,10 @@ export default function BookItemCard({
 
   return (
     <li className="shadow-app flex flex-col overflow-hidden rounded-[10px] border border-border bg-surface">
-      <CoverPlaceholder title={entry.title} />
+      <ItemCover
+        title={entry.title}
+        src={entry.cover_url ?? openLibraryCoverUrl(entry.isbn)}
+      />
       <div className="flex flex-1 flex-col gap-2.5 p-4">
         <span className="font-serif text-[15px] font-bold text-ink">
           {entry.title}

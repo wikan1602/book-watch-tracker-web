@@ -102,6 +102,7 @@ export type WatchItem = {
   source: string;
   trakt_id: string | null;
   tmdb_id: string | null;
+  poster_path: string | null;
 };
 
 export type WatchListEntry = {
@@ -114,6 +115,7 @@ export type WatchListEntry = {
   current_episode: number | null;
   total_episodes: number | null;
   updated_at: string;
+  poster_path: string | null;
 };
 
 export function listMyWatchList() {
@@ -125,6 +127,7 @@ export function createWatchItem(input: {
   title: string;
   year?: number;
   tmdb_id?: string;
+  poster_path?: string;
 }) {
   return request<WatchItem>("/api/v1/watch-items", {
     method: "POST",
@@ -172,6 +175,7 @@ export type BookItem = {
   source: string;
   hardcover_id: string | null;
   isbn: string | null;
+  cover_url: string | null;
 };
 
 export type BookListEntry = {
@@ -186,6 +190,8 @@ export type BookListEntry = {
   current_volume: number | null;
   total_chapters: number | null;
   updated_at: string;
+  cover_url: string | null;
+  isbn: string | null;
 };
 
 export function listMyBookList() {
@@ -235,6 +241,7 @@ export type TmdbResult = {
   type: "movie" | "show";
   title: string;
   year?: number;
+  poster_path?: string; // omitted, not null, when TMDB has none
 };
 
 export function searchTmdb(query: string) {

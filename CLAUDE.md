@@ -102,6 +102,13 @@ and confirmed working as of this session (previously some were unset).
 - [src/components/StatusBadge.tsx](src/components/StatusBadge.tsx) /
   [src/components/CoverPlaceholder.tsx](src/components/CoverPlaceholder.tsx) — see
   "Visual design system" below.
+- [src/components/ItemCover.tsx](src/components/ItemCover.tsx) — real cover art (plain
+  `<img>`, not `next/image` — see below) with a fallback to `CoverPlaceholder` on a
+  missing or failed-to-load image. URL builders in
+  [src/lib/cover.ts](src/lib/cover.ts). See
+  [docs/cover-images-integration.md](docs/cover-images-integration.md) for the full
+  integration writeup (API shapes, per-source caveats, the Hardcover-host-unknown
+  reasoning behind the plain-`<img>` choice).
 
 Status-upsert responses for watch/book items include a `trakt_sync`/`hardcover_sync`
 field; when it's not `"skipped"`, the UI surfaces it as a small inline note next to the
@@ -143,6 +150,8 @@ the default), both via `next/font/google` in `layout.tsx`.
 their status `<select>` rather than rendering a separate `<StatusBadge>` next to it — an
 earlier version showed the same status twice (once editable, once not), which was
 redundant. `Connections` still renders `<StatusBadge>` directly since there's no paired
-interactive control there. `CoverPlaceholder` (title-initial monogram) is the real cover
-art, not a temporary stand-in — neither TMDB nor Google Books search returns a
-poster/cover URL.
+interactive control there. `CoverPlaceholder` (title-initial monogram) is the fallback
+shown via `ItemCover` when there's no real cover URL (or it fails to load) — TMDB
+posters, Hardcover covers, and Open-Library-by-ISBN covers are all wired up (see
+`ItemCover` above); it's no longer true that no source has an image, that was only the
+case before this integration.

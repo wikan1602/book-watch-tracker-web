@@ -5,6 +5,21 @@ what's already built and how it's wired lives in [README.md](README.md);
 backend architecture lives in `docs/blueprint.md` in the
 `book-watch-tracker` repo (sibling directory, separate git repo).
 
+- [x] **Real cover art** — done, per
+      [docs/cover-images-integration.md](docs/cover-images-integration.md).
+      `ItemCover` (`src/components/ItemCover.tsx`) renders a plain `<img>`
+      for TMDB (`poster_path`, watch)/Hardcover (`cover_url`, books)/Open
+      Library (built client-side from `isbn`), falling back to
+      `CoverPlaceholder` on a missing or failed-to-load image. Also fixed
+      the one gap the doc called out: `ListUserBookStatusWithItems`
+      (backend) didn't join `bi.isbn`, so Open Library covers couldn't
+      reach the persisted `/books` list, only the add-modal's search
+      results — added the join + regenerated sqlc, confirmed live
+      (`GET /me/book-list` now returns `isbn`). Not real-browser-verified
+      (Chrome extension was disconnected this session) — confirmed via
+      `tsc`/lint/build clean and curl round-trips against the live API
+      (`poster_path` and `isbn` both persist and come back correctly).
+
 ## Before trusting v1
 
 Most of this is now confirmed for real (not just curl) as of this session —
