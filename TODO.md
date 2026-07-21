@@ -7,43 +7,54 @@ backend architecture lives in `docs/blueprint.md` in the
 
 ## Before trusting v1
 
-Everything below was built and checked from a headless VPS shell
-(`tsc`, lint, `next build`, curl smoke tests, a live end-to-end curl flow
-against the real API) — none of it was clicked through in an actual
-browser against the real API. Do that first:
+Most of this is now confirmed for real (not just curl) as of this session —
+see notes per item. Still-open items are what's left before fully trusting
+v1.
 
-(One note for whoever does this: testing `next dev` from a browser on a
-*different* machine than this VPS needs `allowedDevOrigins` in
-`next.config.ts` set to that machine's reachable address, or Next 16
-silently blocks HMR/RSC dev resources and pages never hydrate — already
-set to this VPS's LAN IP; add your own if different. Separately, the live
-API's CORS only allows `http://localhost:3000` and the prod domain, so a
-browser on another machine hitting the dev server via a non-localhost
-address will never be able to complete real login/register against the
-live API — same-machine `localhost:3000`, or a tunnel that preserves that
-origin, is required for that part. The pagination/skeleton/toast UI
-below *was* browser-verified, but via a temporary auth-free preview route
-with hardcoded data — not through a real login.)
+(One note on browser-testing `next dev` from a machine other than this VPS:
+needs `allowedDevOrigins` in `next.config.ts` set to that machine's
+reachable address, or Next 16 silently blocks HMR/RSC dev resources and
+pages never hydrate — already set to this VPS's LAN IP; add your own if
+different. Separately, the live API's CORS only allows
+`http://localhost:3000` and the prod domain, so a browser on another
+machine hitting the dev server via a non-localhost address can't complete
+real login/register against the live API from there — same-machine
+`localhost:3000`, or a tunnel that preserves that origin, is required for
+that part. Some of the verification below used a temporary auth-free
+preview route with hardcoded data instead, for exactly this reason.)
 
-- [ ] Register, log in, log out
-- [ ] Google sign-in round trip (needs `GOOGLE_CLIENT_ID`/`SECRET` set on
-      the API first — currently unconfigured there)
-- [ ] Add a watch item via TMDB search (needs `TMDB_API_KEY` set on the
-      API — currently unconfigured there)
-- [ ] Add a watch item manually (the "can't find it?" fallback)
-- [ ] Update watch status, and season/episode progress for a show
-- [ ] Remove a watch item
-- [ ] Add a book via Google Books search (needs `GOOGLE_BOOKS_API_KEY`
-      set on the API — currently unconfigured there)
-- [ ] Add a book manually
-- [ ] Update book status, and page (novel) or chapter/volume
-      (manga/manhwa) progress
-- [ ] Connect Trakt (needs `TRAKT_CLIENT_ID`/`SECRET` set on the API —
-      currently unconfigured there) — verify the fetch-then-redirect
-      flow actually lands back on `/watch` with the connection showing
-- [ ] Connect Hardcover (needs a real personal token from hardcover.app)
-- [ ] Check it on an actual mobile viewport — Tailwind classes were
-      written but never visually checked at any size
+- [x] Register, log in, log out — register form checked directly in a real
+      browser (incl. the confirm-password mismatch check added this
+      session); the auth/session chain (token storage, authenticated shell,
+      logout) already confirmed via a live end-to-end curl flow and via the
+      real Google sign-in below.
+- [x] Google sign-in round trip — `GOOGLE_CLIENT_ID`/`SECRET` now
+      configured on the API; a real sign-in was completed and confirmed
+      working.
+- [x] TMDB search — `TMDB_API_KEY` now configured; confirmed returning
+      real results via a real authenticated request. Not separately
+      clicked through the "Add" button inside the modal UI itself.
+- [ ] Add a watch item manually (the "can't find it?" fallback) — not
+      clicked through.
+- [ ] Update watch status, and season/episode progress for a show — the
+      redesigned card UI for this was verified with mock data via a
+      temporary preview route, not against the real API end-to-end.
+- [ ] Remove a watch item — the new `ConfirmDialog` flow (replacing the
+      browser's native `confirm()`) was verified with mock data, not
+      end-to-end against the real API.
+- [x] Google Books search — `GOOGLE_BOOKS_API_KEY` now configured;
+      confirmed returning real results via a real authenticated request.
+      Same caveat as TMDB — the modal's "Add" button itself wasn't clicked.
+- [ ] Add a book manually — not clicked through.
+- [ ] Update book status, and page/chapter/volume progress — same caveat
+      as watch progress above (verified visually with mock data only).
+- [x] Connect Trakt — `TRAKT_CLIENT_ID`/`SECRET` now configured; a real
+      account was connected and confirmed working, including the
+      callback-redirect fix (was landing on a 404 at `/settings`, now
+      correctly lands on `/connections`).
+- [ ] Connect Hardcover — still untested; needs a real personal token from
+      hardcover.app.
+- [ ] Check it on an actual mobile viewport — still never done.
 
 ## Known gaps
 
@@ -84,15 +95,14 @@ with hardcoded data — not through a real login.)
 - [x] **No loading skeletons** — fixed. `src/components/ListItemSkeleton.tsx`
       replaces the "Loading..." text on `/watch` and `/books`.
 
-## Deployment (not started)
+## Deployment
 
-- [ ] Push this repo to GitHub
-- [ ] Import into Vercel, set env var `NEXT_PUBLIC_API_URL=https://api.wikan-ai.my.id`
-- [ ] Point `tracker.wikan-ai.my.id` DNS at Vercel — same Domainesia
-      panel used to add the `api` A record (see the backend repo's
-      conversation history / README for that process)
-- [ ] `https://tracker.wikan-ai.my.id` is already in the API's
-      `CORS_ORIGINS` — no backend change needed once this is live
+Done. Live at `https://tracker.wikan-ai.my.id`, deployed via Vercel
+(auto-deploys on push to `main` on GitHub, `wikan1602/book-watch-tracker-web`),
+`NEXT_PUBLIC_API_URL=https://api.wikan-ai.my.id` set as the Vercel env var.
+DNS points at Vercel via the same Domainesia panel used for the backend's
+`api` A record. No backend change was needed — the prod domain was already
+in the API's `CORS_ORIGINS`.
 
 ## Out of scope for this directory
 

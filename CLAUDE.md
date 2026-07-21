@@ -51,7 +51,8 @@ Live at `https://tracker.wikan-ai.my.id`, deployed via Vercel (auto-deploys on p
 a Vercel env var. The Go API is deployed separately (Docker/docker-compose) at
 `api.wikan-ai.my.id`; Google/TMDB/Trakt/Google Books credentials live in *that* repo's
 `.env`, never here — this app has no server-side secrets of its own, so nothing beyond
-`NEXT_PUBLIC_API_URL` ever needs to go into Vercel's env vars.
+`NEXT_PUBLIC_API_URL` ever needs to go into Vercel's env vars. All four are configured
+and confirmed working as of this session (previously some were unset).
 
 ## Architecture
 
@@ -95,6 +96,12 @@ a Vercel env var. The Go API is deployed separately (Docker/docker-compose) at
 - [src/components/Pagination.tsx](src/components/Pagination.tsx) /
   [src/components/ListItemSkeleton.tsx](src/components/ListItemSkeleton.tsx) — shared
   across `/watch` and `/books`.
+- [src/components/ConfirmDialog.tsx](src/components/ConfirmDialog.tsx) — Cancel/confirm
+  prompt wrapping `Modal`. `WatchItemCard`/`BookItemCard`'s remove action uses this
+  instead of the browser's native `confirm()`.
+- [src/components/StatusBadge.tsx](src/components/StatusBadge.tsx) /
+  [src/components/CoverPlaceholder.tsx](src/components/CoverPlaceholder.tsx) — see
+  "Visual design system" below.
 
 Status-upsert responses for watch/book items include a `trakt_sync`/`hardcover_sync`
 field; when it's not `"skipped"`, the UI surfaces it as a small inline note next to the
@@ -116,10 +123,26 @@ Also: Open Library search (`/api/v1/openlibrary/search`) is implemented but
 issue, not something fixable from this repo. Google Books search is the working
 alternative and is configured.
 
-## Pending visual redesign
+## Visual design system
 
-[design-brief.md](design-brief.md) is a scoping doc for an upcoming from-scratch visual
-redesign (color direction: black + gold/yellow), written to hand off to a separate
-design-focused session. If you land in this repo and the current zinc/neutral Tailwind
-styling looks mid-change, check that file for the intended direction before assuming
-something's broken.
+Black + gold, implemented app-wide — see [design-brief.md](design-brief.md) for the
+original brief. Color tokens live as CSS custom properties in
+[src/app/globals.css](src/app/globals.css), OKLCH, light default in `:root` + dark
+override in `@media (prefers-color-scheme: dark)` (no manual in-app toggle — deliberate,
+not a gap), mapped to Tailwind utilities via `@theme inline` so components use plain
+classes (`bg-surface`, `text-gold`, `font-serif`, etc.) rather than arbitrary-value
+brackets: `--bg`, `--surface`, `--surface-2`, `--border`, `--ink`, `--ink-dim`, `--gold`,
+`--gold-strong`, `--gold-dim`, `--on-gold`, `--danger`, `--danger-dim`. The
+background/border/text tokens are intentionally achromatic (chroma 0) — an earlier pass
+tinted them warm (hue 55, to echo the gold) and it read as a reddish "night mode" filter
+rather than a true black, so only the gold and danger tokens carry any chroma now. Fonts:
+Playfair Display (serif — headings/logo/card titles, `font-serif`) and Manrope (body/UI,
+the default), both via `next/font/google` in `layout.tsx`.
+
+`WatchItemCard`/`BookItemCard` apply `StatusBadge`'s `BADGE_VARIANT_CLASSES` directly to
+their status `<select>` rather than rendering a separate `<StatusBadge>` next to it — an
+earlier version showed the same status twice (once editable, once not), which was
+redundant. `Connections` still renders `<StatusBadge>` directly since there's no paired
+interactive control there. `CoverPlaceholder` (title-initial monogram) is the real cover
+art, not a temporary stand-in — neither TMDB nor Google Books search returns a
+poster/cover URL.
